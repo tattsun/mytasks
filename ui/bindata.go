@@ -5,66 +5,25 @@
 package ui
 
 import (
-	"bytes"
-	"compress/gzip"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
-func bindataRead(data []byte, name string) ([]byte, error) {
-	gz, err := gzip.NewReader(bytes.NewBuffer(data))
+// bindataRead reads the given file from disk. It returns an error on failure.
+func bindataRead(path, name string) ([]byte, error) {
+	buf, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("Read %q: %v", name, err)
+		err = fmt.Errorf("Error reading asset %s at %s: %v", name, path, err)
 	}
-
-	var buf bytes.Buffer
-	_, err = io.Copy(&buf, gz)
-	clErr := gz.Close()
-
-	if err != nil {
-		return nil, fmt.Errorf("Read %q: %v", name, err)
-	}
-	if clErr != nil {
-		return nil, err
-	}
-
-	return buf.Bytes(), nil
+	return buf, err
 }
 
 type asset struct {
 	bytes []byte
 	info  os.FileInfo
-}
-
-type bindataFileInfo struct {
-	name    string
-	size    int64
-	mode    os.FileMode
-	modTime time.Time
-}
-
-func (fi bindataFileInfo) Name() string {
-	return fi.name
-}
-func (fi bindataFileInfo) Size() int64 {
-	return fi.size
-}
-func (fi bindataFileInfo) Mode() os.FileMode {
-	return fi.mode
-}
-func (fi bindataFileInfo) ModTime() time.Time {
-	return fi.modTime
-}
-func (fi bindataFileInfo) IsDir() bool {
-	return false
-}
-func (fi bindataFileInfo) Sys() interface{} {
-	return nil
 }
 
 // Asset loads and returns the asset for the given name.
